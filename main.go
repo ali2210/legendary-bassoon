@@ -5,13 +5,17 @@ package main
 import (
 	http_ipfs_client "github.com/ipfs/go-ipfs-http-client"
 	"fmt"
-	"context"
-	core "github.com/ipfs/interface-go-ipfs-core/path"
+	 "context"
+	p2ps "github.com/libp2p/go-libp2p-core/peer"
+	paths "github.com/ipfs/interface-go-ipfs-core/path"
+	core "github.com/ipfs/interface-go-ipfs-core"
+	multiAddr "github.com/multiformats/go-multiaddr"
 	gocid "github.com/ipfs/go-cid"
 	mulhash "github.com/multiformats/go-multihash"
-	 "crypto/sha256"
+	"crypto/sha256"
 	"encoding/hex"
-	//"strings"
+	//"errors"
+	//"reflect"
 )
 
 func main() {
@@ -50,11 +54,25 @@ func main() {
 	cid := gocid.NewCidV0(multihash)
 	fmt.Println("@go - cid: ", cid)
 	
-	resolved := core.IpfsPath(cid)
+	resolved := paths.IpfsPath(cid)
 	fmt.Println("resolved _ ipfs:", resolved)
-	block_value, err := block.Stat(context.Background(), core.New("/ipfs/"+ resolved.Cid().String())); if err != nil {
-	 	fmt.Println("block error:", err.Error())
-	 	return 
-	 }
-	fmt.Println("@block_stats:", block_value.Path(), block_value.Size())
+	
+	pId, err := p2ps.Decode(resolved.Cid().String()); if err != nil {
+		fmt.Println("peer id error:", err.Error())
+		return 
+	}
+
+	fmt.Println("@peer _ id:", pId)
+	addr , err := multiAddr.NewMultiaddr(multaddr.String()); if err != nil {
+		fmt.Println("multi-address error:", err.Error())
+		return 
+	}	
+	fmt.Println("@multi-address:", addr)
+	addr_info, err := p2ps.AddrInfoFromString("/ip4/127.0.0.1/tcp/4001/p2p/12D3KooWKSG7DZhTNLBqkRzzkvSBbThZ1EpWBsDP54iq6mWLkiv6"); if err != nil {
+		fmt.Println("peer multi-address error:", err.Error())
+		return 
+	}
+	fmt.Println("@peer_multiaddr_info:", addr_info)	
+	var object core.ObjectAPI = core.Object()
+	fmt.Println("@object:", object)
 }
